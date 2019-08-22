@@ -36,8 +36,10 @@ export class AppComponent implements AfterViewInit {
 
   getGridDimensions() {
     this.gridWidth = parseInt(window.prompt('Enter board height (max 20)')) * 25;
+    this.gridWidth = this.gridWidth < 50 ? 50 : this.gridWidth;
     this.gridWidth = !this.gridWidth || this.gridWidth > 500 ? 250 : this.gridWidth;
     this.gridHeight = parseInt(window.prompt('Enter board width (max 20)')) * 25;
+    this.gridHeight = this.gridHeight < 50 ? 50 : this.gridHeight;
     this.gridHeight = !this.gridHeight || this.gridHeight > 500 ? 250 : this.gridHeight;
   }
 
@@ -81,18 +83,28 @@ export class AppComponent implements AfterViewInit {
     let enemy = document.getElementById('enemy') as HTMLOrSVGImageElement;
     this.enemyCount = this.gridHeight > this.gridWidth ? this.gridHeight / 25 : this.gridWidth / 25;
     console.log(this.enemyCount);
-    let enemies = 0;
-    for (let i = 25; i <= this.gridWidth; i += 25) {
-      for (let j = 25; j <= this.gridHeight; j += 25) {
-        if (Math.round(Math.random()) && this.playerPosition !== { x: i, y: j }) {
-          this.boardCtx.drawImage(enemy, i, j);
-          this.enemyPositions.push({ x: i, y: j });
-          enemies++;
-          if (enemies === this.enemyCount) break;
-        }
-        else { };
-      } if (enemies === this.enemyCount) break;
+    //let enemies = 0;
+    let rand = this.generateRandomNumbers(this.gridWidth/25,this.gridHeight/25)
+    for(let i=0;i<this.enemyCount;i++) {
+      let enemyX = rand[0][i]*25;
+      let enemyY = rand[1][i]*25
+      if(this.playerPosition.x === enemyX && this.playerPosition.y === enemyY) {
+        enemyX += 25;
+      }
+      this.boardCtx.drawImage(enemy, enemyX, enemyY);
+      this.enemyPositions.push({ x: enemyX, y: enemyY });
     }
+    // for (let i = 25; i <= this.gridWidth; i += 25) {
+    //   for (let j = 25; j <= this.gridHeight; j += 25) {
+    //     if (Math.round(Math.random()) && this.playerPosition !== { x: i, y: j }) {
+    //       this.boardCtx.drawImage(enemy, i, j);
+    //       this.enemyPositions.push({ x: i, y: j });
+    //       enemies++;
+    //       if (enemies === this.enemyCount) break;
+    //     }
+    //     else { };
+    //   } if (enemies === this.enemyCount) break;
+    // }
   }
 
   clearPreviousState(x, y) {
@@ -144,19 +156,38 @@ export class AppComponent implements AfterViewInit {
   }
 
   checkEnemies() {
-    let enemyFound = this.enemyPositions.find((e)=>{return e.x===this.playerPosition.x && e.y===this.playerPosition.y});
+    let enemyFound = this.enemyPositions.find((e) => { return e.x === this.playerPosition.x && e.y === this.playerPosition.y });
     if (enemyFound) {
       console.log('Enemy encountered');
       this.enemyCount--;
-      this.enemyPositions = this.enemyPositions.filter((e)=>{return !(e.x===this.playerPosition.x && e.y===this.playerPosition.y)});
+      this.enemyPositions = this.enemyPositions.filter((e) => { return !(e.x === this.playerPosition.x && e.y === this.playerPosition.y) });
       if (this.enemyCount === 0) {
-        setTimeout(()=>{
+        setTimeout(() => {
           window.alert(`Victory!! You've defeated the game in ${this.playerStepCount} moves. Feel free to roam around`);
-        },200)
+        }, 200)
         this.gameEnded = true;
       }
     }
+  }
 
+  generateRandomNumbers(x,y) {
+    let randX = [];
+    let randY = [];
+    let n = x > y ? x : y; 
+    while(randX.length < n){
+        let rx = Math.floor(Math.random()*x) + 1;
+        if(randX.indexOf(rx) === -1 || x < n) {
+          randX.push(rx);
+        }
+    }
+    while(randY.length < n) {
+      let ry = Math.floor(Math.random()*y) + 1;
+      if(randY.indexOf(ry) === -1 || y < n) {
+        randY.push(ry);
+      }
+    }
+    console.log(randX,randY);
+    return [randX,randY];
   }
 
   @HostListener('window:keyup', ['$event'])
