@@ -35,10 +35,13 @@ export class AppComponent implements AfterViewInit {
   }
 
   getGridDimensions() {
-    this.gridWidth = parseInt(window.prompt('Enter board height (max 20)')) * 25;
+    this.gridWidth = parseInt(window.prompt('Enter board height (min 2, max 20)')) * 25;
+    /* Handle invalid/min values of gridwidth */
     this.gridWidth = this.gridWidth < 50 ? 50 : this.gridWidth;
     this.gridWidth = !this.gridWidth || this.gridWidth > 500 ? 250 : this.gridWidth;
-    this.gridHeight = parseInt(window.prompt('Enter board width (max 20)')) * 25;
+
+    this.gridHeight = parseInt(window.prompt('Enter board width (min 2,max 20)')) * 25;
+    /* Handle invalid/min values of gridheight */
     this.gridHeight = this.gridHeight < 50 ? 50 : this.gridHeight;
     this.gridHeight = !this.gridHeight || this.gridHeight > 500 ? 250 : this.gridHeight;
   }
@@ -82,12 +85,13 @@ export class AppComponent implements AfterViewInit {
   renderEnemies() {
     let enemy = document.getElementById('enemy') as HTMLOrSVGImageElement;
     this.enemyCount = this.gridHeight > this.gridWidth ? this.gridHeight / 25 : this.gridWidth / 25;
-    console.log(this.enemyCount);
+    console.log('enemycount',this.enemyCount);
     //let enemies = 0;
     let rand = this.generateRandomNumbers(this.gridWidth/25,this.gridHeight/25)
     for(let i=0;i<this.enemyCount;i++) {
       let enemyX = rand[0][i]*25;
       let enemyY = rand[1][i]*25
+      /* if enemy overlaps player, increase enemy x-coordinate by 1 */
       if(this.playerPosition.x === enemyX && this.playerPosition.y === enemyY) {
         enemyX += 25;
       }
@@ -107,6 +111,7 @@ export class AppComponent implements AfterViewInit {
     // }
   }
 
+  /* clear player pixels for its previous location */
   clearPreviousState(x, y) {
     let img = this.boardCtx.createImageData(15, 15);
     for (let i = img.data.length; --i >= 0;)
